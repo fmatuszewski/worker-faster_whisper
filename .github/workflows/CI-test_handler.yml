@@ -66,9 +66,18 @@ jobs:
         run: |
           python builder/fetch_models.py
 
-      - name: Execute Tests
+      - name: Execute Tests 1
         run: |
           python src/rp_handler.py --test_input='{"input": {"audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"}}'
+
+      - name: Execute Tests 2
+        run: |
+          export BUCKET_ENDPOINT_URL=${{vars.BUCKET_ENDPOINT_URL}}
+          export BUCKET_ACCESS_KEY_ID=${{vars.BUCKET_ACCESS_KEY_ID}}
+          export BUCKET_SECRET_ACCESS_KEY=${{secrets.BUCKET_SECRET_ACCESS_KEY}}
+          export BUCKET_REGION=${{vars.BUCKET_REGION}}
+          python src/rp_handler.py --test_input='{"input": {"bucket":"","audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"}}'
+
 
   terminate_worker:
     if: ${{ always() && !success() }}

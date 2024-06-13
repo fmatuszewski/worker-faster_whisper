@@ -1,17 +1,16 @@
 import os
 import uuid
 import zipfile
-from typing import List, Union
+from typing import List, Union, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
 
 import backoff
 import boto3
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 from botocore.config import Config
 from boto3 import session
 from boto3.s3.transfer import TransferConfig
 import multiprocessing
-from typing import Optional, Tuple
 
 HEADERS = {"User-Agent": "runpod-python/0.0.0 (https://runpod.io; support@runpod.io)"}
 
@@ -26,8 +25,7 @@ def calculate_chunk_size(file_size: int) -> int:
 
     return 1024*1024*10  # 10 MB
 
-def get_boto_client(
-        bucket_creds: Optional[dict] = None) -> Tuple[Optional[boto3.client], TransferConfig]:  # pragma: no cover # pylint: disable=line-too-long
+def get_boto_client(bucket_creds: Optional[dict] = None) -> Tuple[boto3.client, TransferConfig]:
     '''
     Returns a boto3 client and transfer config for the bucket.
     '''
@@ -60,7 +58,6 @@ def get_boto_client(
         region = os.getenv('BUCKET_REGION')
 
     if endpoint_url and access_key_id and secret_access_key:
-
         try:
             boto_client = bucket_session.client(
                 's3',
@@ -70,53 +67,20 @@ def get_boto_client(
                 config=boto_config,
                 region_name=region
             )
-            
         except NoCredentialsError:
-            print("Credentials not available.")
-            return None
+            raise NoCredentialsError("Credentials not available.")
         except PartialCredentialsError:
-            print("Incomplete credentials provided.")
-            return None
-    
-
+            raise PartialCredentialsError("Incomplete credentials provided.")
     else:
-        boto_client = None
+        raise NoCredentialsError("No credentials provided in environment variables or bucket_creds.")
 
     return boto_client, transfer_config
-
-
-
-# def initialize_s3_client():
-#     temp_boto_config = Config(
-#         signature_version='s3v4',
-#         retries={
-#             'max_attempts': os.getenv('MAX_ATTEMPTS',3),
-#             'mode': 'standard'
-#         }
-#     )
-#     try:
-#         s3_client = boto3.client(
-#             's3',
-#             region_name=os.getenv('BUCKET_REGION'),
-#             endpoint_url=os.getenv('BUCKET_ENDPOINT_URL',None) ,
-#             aws_access_key_id=os.getenv('BUCKET_ACCESS_KEY_ID',None),
-#             aws_secret_access_key=os.getenv('BUCKET_SECRET_ACCESS_KEY',None),
-#             config=temp_boto_config
-#         )
-#         return s3_client
-#     except NoCredentialsError:
-#         print("Credentials not available.")
-#         return None
-#     except PartialCredentialsError:
-#         print("Incomplete credentials provided.")
-#         return None
 
 def download_files_from_s3(
         job_id: str,
         bucket_name: str,
         object_names: Union[str, List[str]],
-        bucket_creds: Optional[dict] = None,
-        ) -> List[str]:
+        bucket_creds: Optional[dict] = None) -> List[Optional[str]]:
     """
     Accepts a single S3 object name or a list of object names and downloads the files.
     Returns the list of downloaded file absolute paths.
@@ -126,10 +90,8 @@ def download_files_from_s3(
     os.makedirs(download_directory, exist_ok=True)
 
     s3_client, transfer_config = get_boto_client(bucket_creds)
-    if s3_client is None:
-        return None
 
-    @backoff.on_exception(backoff.expo, boto3.exceptions.S3UploadFailedError, max_tries=3)
+    @backoff.on_exception(backoff.expo, ClientError, max_tries=3)
     def download_file(s3_client, bucket_name: str, object_name: str, path_to_save: str):
         try:
             s3_client.download_file(bucket_name, object_name, path_to_save)
@@ -138,7 +100,7 @@ def download_files_from_s3(
             print(f'Error downloading file: {e}')
             return None
 
-    def download_file_to_path(object_name: str) -> str:
+    def download_file_to_path(object_name: str) -> Optional[str]:
         if object_name is None:
             return None
 
@@ -156,6 +118,9 @@ def download_files_from_s3(
 
     if isinstance(object_names, str):
         object_names = [object_names]
+
+    if not object_names:
+        return []
 
     with ThreadPoolExecutor() as executor:
         downloaded_files = list(executor.map(download_file_to_path, object_names))
@@ -175,9 +140,7 @@ def file_s3(bucket_name: str, object_name: str) -> Optional[dict]:
     '''
     os.makedirs('job_files', exist_ok=True)
 
-    s3_client,_ = get_boto_client()
-    if s3_client is None:
-        return None
+    s3_client, _ = get_boto_client()
 
     file_extension = os.path.splitext(object_name)[1].replace('.', '')
     file_name = f'{uuid.uuid4()}'
