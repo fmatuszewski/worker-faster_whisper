@@ -10,6 +10,7 @@ import tempfile
 
 from rp_schema import INPUT_VALIDATIONS
 from runpod.serverless.utils import download_files_from_urls, rp_cleanup, rp_debugger
+from rp_download import download_files_from_s3
 from runpod.serverless.utils.rp_validator import validate
 import runpod
 import predict
@@ -17,6 +18,7 @@ import predict
 
 MODEL = predict.Predictor()
 MODEL.setup()
+print(f"Failed to download {url}: {err}")
 
 
 def base64_to_tempfile(base64_file: str) -> str:
@@ -34,6 +36,10 @@ def base64_to_tempfile(base64_file: str) -> str:
 
     return temp_file.name
 
+
+
+
+    
 
 @rp_debugger.FunctionTimer
 def run_whisper_job(job):
@@ -61,9 +67,13 @@ def run_whisper_job(job):
     if job_input.get('audio', False) and job_input.get('audio_base64', False):
         return {'error': 'Must provide either audio or audio_base64, not both'}
 
-    if job_input.get('audio', False):
+    if job_input.get('audio', False) and not job_input.get('bucket',False):
         with rp_debugger.LineTimer('download_step'):
             audio_input = download_files_from_urls(job['id'], [job_input['audio']])[0]
+
+    if job_input.get('audio', False) and job_input.get('bucket', False):
+        with rp_debugger.LineTimer('download_step'):
+            audio_input = download_files_from_s3(job['id'], job_input['bucket'], [job_input['audio']])[0]
 
     if job_input.get('audio_base64', False):
         audio_input = base64_to_tempfile(job_input['audio_base64'])

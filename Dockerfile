@@ -9,6 +9,12 @@ SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
 
+# Set environment variables with default values
+ENV BUCKET_ENDPOINT_URL=https://muozqzkzhpkyruzduxjh.supabase.co/storage/v1/s3
+ENV BUCKET_ACCESS_KEY_ID=881ff52de23841cf298a15e557690a80
+ENV BUCKET_SECRET_ACCESS_KEY=default-secret-access-key
+ENV BUCKET_REGION=eu-central-1
+
 # Set working directory
 WORKDIR /
 

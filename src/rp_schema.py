@@ -4,6 +4,11 @@ INPUT_VALIDATIONS = {
         'required': False,
         'default': None
     },
+    'bucket':{
+        'type':str,
+        'required':False,
+        'default':None
+    },
     'audio_base64': {
         'type': str,
         'required': False,

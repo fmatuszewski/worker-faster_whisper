@@ -46,7 +46,13 @@ The following inputs can be used for testing the model:
     }
 }
 ```
-
+```json
+{
+    "input": {
+        "audio": "test_1.m4a","bucket":"transcription"
+    }
+}
+```
 ## Sample output
 ```json
 {
