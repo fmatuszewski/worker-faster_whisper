@@ -14,11 +14,15 @@ from rp_download import download_files_from_s3
 from runpod.serverless.utils.rp_validator import validate
 import runpod
 import predict
-
+import os
 
 MODEL = predict.Predictor()
 MODEL.setup()
-print(f"Failed to download {url}: {err}")
+
+print(f"BUCKET_ENDPOINT_URL: {os.environ.get('BUCKET_ENDPOINT_URL', None)}")
+print(f"BUCKET_ACCESS_KEY_ID: {os.environ.get('BUCKET_ACCESS_KEY_ID', None)}")
+print(f"BUCKET_REGION: {os.getenv('BUCKET_REGION')}")
+
 
 
 def base64_to_tempfile(base64_file: str) -> str:
