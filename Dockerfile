@@ -53,8 +53,6 @@ COPY builder/fetch_models.py /fetch_models.py
 RUN python /fetch_models.py && \
     rm /fetch_models.py
 
-# Display Cuda version
-RUN nvcc --version
 
 # Copy source code into image
 COPY src .
