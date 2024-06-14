@@ -4,8 +4,8 @@ curl -X POST http://localhost:8000 \
         "input": {
             "model": "medium",
             "audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"
-        }
-    }'
+            }
+        }'
 curl -X POST http://localhost:8000 \
     -H "Content-Type: application/json" \
     -d '{
