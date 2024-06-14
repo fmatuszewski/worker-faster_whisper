@@ -52,9 +52,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY builder/fetch_models.py /fetch_models.py
 RUN python /fetch_models.py && \
     rm /fetch_models.py
-    
+
 # Copy tests file
-COPY run_tests.sh /run_tests.sh
+COPY --chmod=0755 run_tests.sh .
 
 # Copy source code into image
 COPY src .
