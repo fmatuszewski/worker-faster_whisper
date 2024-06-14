@@ -1,4 +1,4 @@
 services:
   sut:
     build: .
-    command: run_tests.sh
+    command: /run_tests.sh
