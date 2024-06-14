@@ -47,7 +47,7 @@ The following inputs can be used for testing the model:
 }
 ```
 ```json
-python rp_handler.py --rp_serve_api '{"input": {"audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"}}'
+python src/rp_handler.py --rp_serve_api '{"input": {"audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"}}'
 ```
 ```json
 {
