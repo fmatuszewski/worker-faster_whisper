@@ -1,5 +1,6 @@
 # Use specific version of nvidia cuda image
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu20.04
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
+
 
 # Remove any third-party apt sources to avoid issues with expiring keys.
 RUN rm -f /etc/apt/sources.list.d/*.list
@@ -41,6 +42,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py && \
     rm get-pip.py
 
+
 # Install Python dependencies (Worker Template)
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -53,6 +55,9 @@ COPY builder/fetch_models.py /fetch_models.py
 RUN python /fetch_models.py && \
     rm /fetch_models.py
 
+# RUN python -m pip install --upgrade pip wheel
+# RUN python -m pip install nvidia-cudnn-cu12    
+    
 # Copy tests file
 COPY --chmod=0755 run_tests.sh .
 

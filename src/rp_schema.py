@@ -17,7 +17,7 @@ INPUT_VALIDATIONS = {
     'model': {
         'type': str,
         'required': False,
-        'default': 'medium'
+        'default': 'base'
     },
     'transcription': {
         'type': str,
