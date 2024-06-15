@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from faster_whisper import WhisperModel
 
 # model_names = ["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3"]
-model_names = ["tiny","base"]
+model_names = ["tiny","base","medium","large-v2"]
 
 
 
