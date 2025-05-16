@@ -1,0 +1,32 @@
+[
+  {
+    "input": {
+      "no_speech_threshold": 0.3,
+      "language": "pl",
+      "model": "medium",
+      "bucket": "audio",
+      "audio": "f02e51c7-140b-4824-971d-532f65307385/1f8f1f06-6ba8-4973-8d2b-2939168a9d9b/audio_1731435800759.m4a"
+    }
+  },
+  {
+    "input": {
+      "no_speech_threshold": 0.3,
+      "language": "pl",
+      "model": "medium",
+      "bucket": "audio",
+      "audio": "c4bee6c6-ac8a-4edb-92df-aaa09a2cc8ef/12cfccd7-51d9-40f1-b4da-f0e5401439d0/6d3741e3-2b0f-4aff-be0a-19a5f6e1b0a8/audio_1735320606287.flac"
+    },
+    "webhook": "https://muozqzkzhpkyruzduxjh.functions.supabase.co/update-segment/0479850d-8375-469e-a2bb-500edaac142d"
+  },
+  {
+    "input": {
+      "no_speech_threshold": 0.6,
+      "model": "medium",
+      "bucket": "audio",
+      "audio": "c4bee6c6-ac8a-4edb-92df-aaa09a2cc8ef/f6bd1269-b736-469a-a2d8-8da15125a1c6/6f281885-8054-4917-962e-547e622d8804/audio_1732273114853.flac"
+    },
+    "webhook": "https://muozqzkzhpkyruzduxjh.functions.supabase.co/update-segment/0479850d-8375-469e-a2bb-500edaac142d"
+  }
+
+
+]

@@ -1,0 +1,35 @@
+[
+    {"test1":{
+        "input": {
+            "model": "medium",
+            "audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav"
+            }
+        }
+    
+    },
+    {"test2":{
+        "input": {
+            "model": "medium",
+            "language": "pl",
+            "bucket":"audio",
+            "audio": "test_1.m4a"
+        }
+    }},
+    {"test3":{
+        "input": {
+            "model": "medium",
+            "language": "pl",
+            "bucket":"audio",
+            "audio": "audio_1732101620318.m4a"
+        }
+    }},
+    {"test5":{
+        "input": {
+          "no_speech_threshold": 0.6,
+          "model": "medium",
+          "bucket": "audio",
+          "audio": "c4bee6c6-ac8a-4edb-92df-aaa09a2cc8ef/f6bd1269-b736-469a-a2d8-8da15125a1c6/6f281885-8054-4917-962e-547e622d8804/audio_1732273114853.flac"
+        },
+        "webhook": "https://muozqzkzhpkyruzduxjh.functions.supabase.co/update-segment/0479850d-8375-469e-a2bb-500edaac142d"
+      }}
+]
