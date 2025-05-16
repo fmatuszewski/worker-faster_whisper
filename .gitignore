@@ -166,4 +166,4 @@ Activate.*
 pip*
 python*
 lib64
-/env.sh
+tests/env.sh
