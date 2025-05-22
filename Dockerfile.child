@@ -1,14 +1,20 @@
 # -------------------------------------------------
 # RUNTIME image – rebuilt on each commit
 # -------------------------------------------------
-    FROM fmatuszewski/worker-faster_whisper_core:1.0
 
+    ARG DOCKERHUB_USER
+    ARG BASE_TAG          # tiny-core | small-core | large-core
+    ARG CHILD_TAG         # tiny | small | large  ← NEW
+    
+    FROM ${DOCKERHUB_USER}/worker-faster_whisper_core:${BASE_TAG}
+    
+    # Make the tag visible to the app at runtime
+    ENV MODEL_SIZE=${CHILD_TAG}
+    
     ENV BUCKET_ENDPOINT_URL=https://muozqzkzhpkyruzduxjh.supabase.co/storage/v1/s3 \
         BUCKET_REGION=eu-central-1
-
-    WORKDIR /src          # keep everything right here
     
-    # Files that change often
+    WORKDIR /src
     COPY src /src
     COPY --chmod=0755 run_tests.sh /src/
     

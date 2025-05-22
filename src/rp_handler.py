@@ -226,7 +226,7 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
             whisper_results, predict_logs = MODEL.predict(
                 audio=audio_input_path,
-                model_name=job_input["model"],
+                model_name=os.getenv("MODEL_SIZE", "tiny"),
                 transcription=job_input["transcription"],
                 translate=job_input["translate"],
                 language=job_input["language"],

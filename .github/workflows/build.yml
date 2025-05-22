@@ -98,5 +98,6 @@ jobs:
           build-args: |
             DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
             BASE_TAG=${{ matrix.base }}
+            CHILD_TAG=${{ matrix.tag }} 
           cache-from: type=registry,ref=${{ env.CACHE_TAG }}
           cache-to:   type=registry,ref=${{ env.CACHE_TAG }},mode=max
