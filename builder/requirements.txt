@@ -3,3 +3,4 @@ hf_xet
 
 faster-whisper==1.0.2
 
+huggingface-hub[hf_transfer,tqdm]>=0.23      # extra „hf_transfer” dociąga szybszy backend

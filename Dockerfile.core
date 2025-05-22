@@ -31,16 +31,28 @@
     RUN curl -sS https://bootstrap.pypa.io/get-pip.py -o /get-pip.py && \
         python /get-pip.py && rm /get-pip.py
     
-    # 4. Python dependencies
+  
+    ### 4. Python dependencies
+    ### PATCH: deps
     COPY builder/requirements.txt /tmp/requirements.txt
     RUN --mount=type=cache,target=/root/.cache/pip \
-        pip install --upgrade pip && \
+        PIP_ROOT_USER_ACTION=ignore pip install --upgrade pip && \
         pip install --no-cache-dir -r /tmp/requirements.txt && \
         rm /tmp/requirements.txt
     
+
+
+            
     # 5. Fetch models
+    ### PATCH: 5. Fetch models  ─ pobieramy, nie ładujemy
+    ENV HF_HUB_ENABLE_HF_TRANSFER=1  
+    ENV PIP_ROOT_USER_ACTION=ignore             
     COPY builder/fetch_models.py /tmp/fetch_models.py
-    RUN python /tmp/fetch_models.py && rm /tmp/fetch_models.py
+
+    # cache => drugi build trwa sekundy, nie godziny
+    RUN --mount=type=cache,target=/root/.cache/huggingface \
+        python /tmp/fetch_models.py && rm /tmp/fetch_models.py
+    
     
     LABEL org.opencontainers.image.title="worker-faster_whisper_core" \
           org.opencontainers.image.description="Core layer with CUDA, Python 3.10, deps, and models"

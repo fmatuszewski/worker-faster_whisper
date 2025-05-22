@@ -1,31 +1,32 @@
-from concurrent.futures import ThreadPoolExecutor
-from faster_whisper import WhisperModel
+"""
+Pobiera (snapshot_download) modele Whisper do obrazu
+bez ich ładowania do RAM-u.
 
-# model_names = ["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3"]
-model_names = ["tiny","base","medium","large-v2"]
+Uruchamiane w Dockerfile (patrz sekcja 5).
+"""
 
+from pathlib import Path
+from huggingface_hub import snapshot_download
 
+DEST_DIR = Path("/models")        # możesz zmienić
+MODELS = ["tiny", "base", "medium", "large-v2"]
 
-def load_model(selected_model):
-    '''
-    Load and cache models in parallel
-    '''
-    for _attempt in range(5):
-        while True:
-            try:
-                loaded_model = WhisperModel(
-                    selected_model, device="cpu", compute_type="int8")
-            except (AttributeError, OSError):
-                continue
+def download(model_name: str) -> None:
+    repo_id = f"openai/whisper-{model_name}"
+    out_dir = DEST_DIR / model_name
+    print(f"⬇️  {repo_id}  →  {out_dir}")
+    snapshot_download(
+        repo_id=repo_id,
+        local_dir=str(out_dir),
+        local_dir_use_symlinks=False,   # bez dyskowych sztuczek
+        resume_download=True            # wznawia po przerwaniu
+    )
 
-            break
+def main() -> None:
+    DEST_DIR.mkdir(parents=True, exist_ok=True)
+    for name in MODELS:
+        download(name)
+    print("✅ Wszystkie modele pobrane.")
 
-    return selected_model, loaded_model
-
-
-models = {}
-
-with ThreadPoolExecutor() as executor:
-    for model_name, model in executor.map(load_model, model_names):
-        if model_name is not None:
-            models[model_name] = model
+if __name__ == "__main__":
+    main()
