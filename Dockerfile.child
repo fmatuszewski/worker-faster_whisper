@@ -6,7 +6,7 @@
     ARG BASE_TAG          # tiny-core | small-core | large-core
     ARG CHILD_TAG         # tiny | small | large  ← NEW
     
-    FROM ${DOCKERHUB_USER}/worker-faster_whisper_core:${BASE_TAG}
+    FROM ${DOCKERHUB_USER}/worker-faster_whisper:${BASE_TAG}
     
     # Make the tag visible to the app at runtime
     ENV MODEL_SIZE=${CHILD_TAG}
