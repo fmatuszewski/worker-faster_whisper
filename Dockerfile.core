@@ -54,6 +54,6 @@
         python /tmp/fetch_models.py && rm /tmp/fetch_models.py
     
     
-    LABEL org.opencontainers.image.title="worker-faster_whisper_core" \
+    LABEL org.opencontainers.image.title="worker-faster_whisper" \
           org.opencontainers.image.description="Core layer with CUDA, Python 3.10, deps, and models"
     
