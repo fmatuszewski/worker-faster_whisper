@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  IMAGE_REPO: ${{ secrets.DOCKERHUB_USER }}/worker-whisper
+  IMAGE_REPO: ${{ secrets.DOCKERHUB_USER }}/worker-faster_whisper
 
 jobs:
   core:
@@ -47,8 +47,8 @@ jobs:
           tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
           build-args: |
             WHISPER_MODELS=${{ matrix.models }}
-          cache-from: type=registry,ref=${{ env.IMAGE_REPO }}:cache
-          cache-to: type=registry,ref=${{ env.IMAGE_REPO }}:cache,mode=max
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
 
   child:
     runs-on: ubuntu-latest
