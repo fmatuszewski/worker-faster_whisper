@@ -1,0 +1,84 @@
+name: Build Whisper images
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+env:
+  IMAGE_REPO: ${{ secrets.DOCKERHUB_USER }}/worker-whisper
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tag: tiny-core
+            models: tiny
+          - tag: small-core
+            models: tiny,small
+          - tag: large-core
+            models: large-v2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Check image existence
+        id: check
+        run: |
+          if docker manifest inspect $IMAGE_REPO:${{ matrix.tag }} > /dev/null 2>&1 ; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & Push CORE
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.core
+          push: true
+          tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
+          build-args: |
+            WHISPER_MODELS=${{ matrix.models }}
+          cache-from: type=registry,ref=${{ env.IMAGE_REPO }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE_REPO }}:cache,mode=max
+
+  child:
+    runs-on: ubuntu-latest
+    needs: core
+    strategy:
+      matrix:
+        include:
+          - tag: tiny
+            base: tiny-core
+          - tag: small
+            base: small-core
+          - tag: large
+            base: large-core
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push CHILD
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.child
+          push: true
+          tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
+          build-args: |
+            DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
+            BASE_TAG=${{ matrix.base }}
+          cache-from: type=registry,ref=${{ env.IMAGE_REPO }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE_REPO }}:cache,mode=max
