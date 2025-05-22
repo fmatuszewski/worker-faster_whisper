@@ -13,6 +13,7 @@ from runpod.serverless.utils import rp_cuda
 
 from faster_whisper import WhisperModel
 from faster_whisper.utils import format_timestamp
+from pathlib import Path
 
 # Configure logging
 # Using the same logger instance as rp_handler if this runs in the same process,
@@ -149,6 +150,14 @@ class Predictor:
             logger.info(f"{log_prefix}Starting transcription for audio: {audio} with model {model_name}")
             predict_logs.append(f"INFO: {log_prefix}Starting transcription for audio: {audio} with model {model_name}")
             
+            audio_path = Path(audio).expanduser().resolve()
+
+            if not audio_path.exists():
+                error_msg = f"[Predictor] Audio file missing: {audio_path}"
+                logger.error(error_msg)
+                predict_logs.append(f"ERROR: {log_prefix}{error_msg}")
+                raise FileNotFoundError(error_msg)  
+             
             segments_iterable, info = model.transcribe(
                 audio=str(audio), # Ensure audio is string path
                 language=language,

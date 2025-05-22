@@ -92,6 +92,9 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
     dict: The result of the prediction or an error object with detailed_logs
     '''
+    APP_VERSION = os.getenv("APP_VERSION", "0.0.0-dev")
+
+    logger.info(f"Starting worker. Version: {APP_VERSION}")
     job_id = job.get('id', 'unknown_job')
     job_logs: List[str] = [f"INFO: Starting job ID: {job_id}"]
     logger.info(f"Starting job ID: {job_id}")
@@ -164,6 +167,15 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
                     job_logs.extend(s3_logs)
                     if downloaded_files and downloaded_files[0]:
                         audio_input_path = downloaded_files[0]
+                         # NEW: verify download -------------------------------------------------
+                        if not Path(audio_input_path).exists():
+                            err = (f"Job {job_id}: S3 download reported success but file "
+                                f"does not exist on disk: {audio_input_path}")
+                            logger.error(err)
+                            job_logs.append(f"ERROR: {err}")
+                            return {"error": "File missing after S3 download", "detailed_logs": job_logs}
+                        # ---------------------------------------------------------------------
+
                         logger.info(f"Job {job_id}: Successfully downloaded from S3 to {audio_input_path}.")
                         job_logs.append(f"INFO: Job {job_id}: Successfully downloaded from S3 to {audio_input_path}.")
                     else:
@@ -179,6 +191,17 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
                         downloaded_paths = download_files_from_urls(job_id, [audio_url])
                         if downloaded_paths and downloaded_paths[0]:
                             audio_input_path = downloaded_paths[0]
+                            
+                             # NEW: verify download -------------------------------------------------
+                            if not Path(audio_input_path).exists():
+                                err = (f"Job {job_id}: public url download reported success but file "
+                                    f"does not exist on disk: {audio_input_path}")
+                                logger.error(err)
+                                job_logs.append(f"ERROR: {err}")
+                                return {"error": "File missing after URL download", "detailed_logs": job_logs}
+                            # ---------------------------------------------------------------------
+
+                            
                             logger.info(f"Job {job_id}: Successfully downloaded from URL to {audio_input_path}.")
                             job_logs.append(f"INFO: Job {job_id}: Successfully downloaded from URL to {audio_input_path}.")
                         else:
