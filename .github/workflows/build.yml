@@ -46,6 +46,9 @@ jobs:
           else
             echo "exists=false" >>"$GITHUB_OUTPUT"
           fi
+      - name: Debug - show matrix value
+        run: |
+          echo "::notice title=Matrix models::'${{ matrix.tag }} - ${{ matrix.models }}'"
 
       - name: Build & Push CORE
         if: steps.check.outputs.exists == 'false'
