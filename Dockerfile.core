@@ -1,12 +1,13 @@
 # -------------------------------------------------
 # CORE image – rarely rebuilt
 # -------------------------------------------------
-    ARG WHISPER_MODELS
+    FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
+
+    ARG WHISPER_MODELS="tiny"
     ARG GIT_SHA
     ARG GIT_BRANCH
 
-
-    FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
+    ENV WHISPER_MODELS=${WHISPER_MODELS}
 
     RUN echo "WHISPER_MODELS=$WHISPER_MODELS" 
 
@@ -39,7 +40,7 @@
     RUN curl -sS https://bootstrap.pypa.io/get-pip.py -o /get-pip.py && \
         python /get-pip.py && rm /get-pip.py
     
-    ENV WHISPER_MODELS=${WHISPER_MODELS}
+
 
   
     ### 4. Python dependencies

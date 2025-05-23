@@ -1,15 +1,15 @@
 # -------------------------------------------------
 # RUNTIME image – rebuilt on each commit
 # -------------------------------------------------
-
+    FROM ${DOCKERHUB_USER}/worker-faster_whisper:${BASE_TAG}
+    
+    
     ARG DOCKERHUB_USER
     ARG BASE_TAG          # tiny-core | small-core | large-core
     ARG CHILD_TAG         # tiny | small | large  ← NEW
     ARG GIT_SHA
     ARG GIT_BRANCH
-    
-    FROM ${DOCKERHUB_USER}/worker-faster_whisper:${BASE_TAG}
-    
+
     # Make the tag visible to the app at runtime
     ENV MODEL_SIZE=${CHILD_TAG}
     ENV APP_VERSION=${GIT_BRANCH}-${GIT_SHA}
