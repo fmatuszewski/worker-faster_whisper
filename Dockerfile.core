@@ -41,9 +41,6 @@
     
     ENV WHISPER_MODELS=${WHISPER_MODELS}
 
-    # Test for models
-    COPY builder/test_models.py /tmp/test_models.py
-    RUN python /tmp/test_models.py && rm /tmp/test_models.py    
   
     ### 4. Python dependencies
     ### PATCH: deps
