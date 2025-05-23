@@ -20,13 +20,13 @@ jobs:
         include:
           - tag: tiny-core
             models: tiny
-            storage: 10GB
+            storage:  10737418240     # 10 GB
           - tag: small-core
             models: tiny,small
-            storage: 15GB
+            storage: 16106127360     # 15 GB
           - tag: large-core
             models: large-v2
-            storage: 20GB
+            storage: 21474836480     # 20 GB
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
-          buildkitd-flags: --oci-worker-gc-keepstorage  ${{ matrix.storage }}   # ← 30 GB quota
+          buildkitd-flags: --oci-worker-gc-keepstorage=${{ matrix.storage }}
 
       - uses: docker/login-action@v3
         with:
