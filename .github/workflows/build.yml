@@ -57,6 +57,8 @@ jobs:
           tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
           build-args: |
             WHISPER_MODELS=${{ matrix.models }}
+            GIT_SHA=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
           cache-from: type=registry,ref=${{ env.CACHE_TAG }}
           cache-to:   type=registry,ref=${{ env.CACHE_TAG }},mode=max
 
@@ -99,5 +101,7 @@ jobs:
             DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
             BASE_TAG=${{ matrix.base }}
             CHILD_TAG=${{ matrix.tag }} 
+            GIT_SHA=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
           cache-from: type=registry,ref=${{ env.CACHE_TAG }}
           cache-to:   type=registry,ref=${{ env.CACHE_TAG }},mode=max

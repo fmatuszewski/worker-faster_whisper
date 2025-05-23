@@ -1,11 +1,19 @@
 # -------------------------------------------------
 # CORE image – rarely rebuilt
 # -------------------------------------------------
+    ARG WHISPER_MODELS
+    ARG GIT_SHA
+    ARG GIT_BRANCH
+        
     FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
 
     # 0. House-keeping
     RUN rm -f /etc/apt/sources.list.d/*.list
     SHELL ["/bin/bash", "-c"]
+
+
+    ENV WHISPER_MODELS=${WHISPER_MODELS}
+
     ENV DEBIAN_FRONTEND=noninteractive \
         SHELL=/bin/bash 
     

@@ -44,8 +44,9 @@ def initialize_model(job_logs: List[str]) -> bool:
 
 
 logger.info(f"BUCKET_ENDPOINT_URL: {os.environ.get('BUCKET_ENDPOINT_URL', None)}")
-logger.info(f"BUCKET_ACCESS_KEY_ID: {os.environ.get('BUCKET_ACCESS_KEY_ID', None)}")
 logger.info(f"BUCKET_REGION: {os.getenv('BUCKET_REGION')}")
+logger.info(f"Offline Models: {os.environ.get('WHISPER_MODELS')}")
+logger.info(f"App Version: {os.environ.get('APP_VERSION')}")
 
 
 def base64_to_tempfile(base64_file: str, job_logs: List[str]) -> Optional[str]:
