@@ -63,6 +63,7 @@
     # cache => drugi build trwa sekundy, nie godziny
     RUN --mount=type=cache,id=models,target=/models \
         --mount=type=cache,id=hf-cache,target=/root/.cache/huggingface \
+        TMPDIR=/models/tmp \
         python /tmp/fetch_models.py && rm /tmp/fetch_models.py
 
     
