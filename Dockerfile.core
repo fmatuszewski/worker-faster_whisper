@@ -56,13 +56,18 @@
             
     # 5. Fetch models
     ### PATCH: 5. Fetch models  ─ pobieramy, nie ładujemy
-    ENV HF_HUB_ENABLE_HF_TRANSFER=1  
+    ENV HF_HUB_ENABLE_HF_TRANSFER=0  
     ENV PIP_ROOT_USER_ACTION=ignore             
     COPY builder/fetch_models.py /tmp/fetch_models.py
 
     # cache => drugi build trwa sekundy, nie godziny
-    RUN --mount=type=cache,target=/models \
+    RUN --mount=type=cache,id=models,target=/models \
+        --mount=type=cache,id=hf-cache,target=/root/.cache/huggingface \
+        --mount=type=cache,id=tmp,target=/tmp \
+        TMPDIR=/tmp \
         python /tmp/fetch_models.py && rm /tmp/fetch_models.py
+
+    
     
     LABEL org.opencontainers.image.title="worker-faster_whisper" \
           org.opencontainers.image.description="Core layer with CUDA, Python 3.10, deps, and models"
