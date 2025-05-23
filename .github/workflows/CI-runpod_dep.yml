@@ -24,7 +24,12 @@ jobs:
           echo "Fetching the current runpod version from requirements.txt..."
 
           # Get current version, allowing for '~=' operator
-          current_version=$(grep -oP 'runpod~=\K[^ ]+' ./builder/requirements.txt)
+          current_version=$(grep -oP '^runpod\s*(?:==|~=)\s*\K[0-9.]+'./builder/requirements.txt 2>/dev/null || true)
+
+          if [[ -z "$current_version" ]]; then
+            echo "runpod not found – exiting gracefully."
+            exit 0                     # or `exit 1` if missing line is an error
+          fi
           echo "Current version: $current_version"
 
           # Get new version from PyPI
