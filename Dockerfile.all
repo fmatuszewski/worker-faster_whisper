@@ -1,10 +1,7 @@
 # -------------------------------------------------
 # RUNTIME image – rebuilt on each commit
 # -------------------------------------------------
-    ARG DOCKERHUB_USER
-    ARG BASE_TAG          # tiny-core | small-core | large-core
-
-    FROM ${DOCKERHUB_USER}/worker-faster_whisper:${BASE_TAG}
+    FROM runpod/ai-api-faster-whisper:1.0.10
     
     ARG CHILD_TAG         # tiny | small | large  ← NEW
     ARG GIT_SHA

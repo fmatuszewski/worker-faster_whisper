@@ -24,8 +24,8 @@ jobs:
           - tag: small-core
             models: tiny,small
             storage: 16106127360     # 15 GB
-          - tag: large-core
-            models: large-v2
+          - tag: medium-core
+            models: medium
             storage: 21474836480     # 20 GB
 
     steps:
@@ -82,8 +82,8 @@ jobs:
             base: tiny-core
           - tag: small
             base: small-core
-          - tag: large
-            base: large-core
+          - tag: medium
+            base: medium-core
 
     steps:
       - uses: actions/checkout@v4
