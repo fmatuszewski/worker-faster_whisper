@@ -6,6 +6,8 @@ rp_debugger:
 The handler must be called with --rp_debugger flag to enable it.
 """
 import base64
+from pathlib import Path
+import sys
 import tempfile
 import logging
 import os
@@ -34,6 +36,27 @@ DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "tiny");
 if not DEFAULT_MODEL in MODELS:
     sys.exit(f"Domyślny model '{DEFAULT_MODEL}' nie jest zawarty w liście dostępnych modeli '{MODELS}' !")
 
+def check_model_cache(models: List[str]) -> List[str]:
+    """
+    Checks if the specified models are cached in the /models directory.
+
+    Args:
+        models (List[str]): A list of model names to check.
+
+    Returns:
+        List[str]: A list of model names that are successfully cached.
+    """
+    cached_models = []
+    for name in models:
+        model_path = Path(f"/models/{name}")
+        if model_path.exists() and model_path.is_dir():
+            logger.info(f"Model {name} found in cache at {model_path}")
+            cached_models.append(name)
+        else:
+            logger.warning(f"Model {name} not found in cache at {model_path}")
+    return cached_models
+
+
 def initialize_model(job_logs: List[str], models: List[str]) -> bool:
     global MODEL
 
@@ -41,17 +64,28 @@ def initialize_model(job_logs: List[str], models: List[str]) -> bool:
     if MODEL is None:
         try:
             logger.warning("Model Should be initialized in the container")
-            logger.info(f"Initializing models {models} ...")
-            job_logs.append(f"INFO: Initializing models {models}...")
+
+            # Check model cache
+            cached_models = check_model_cache(models)
+            if not cached_models:
+                logger.error("No models found in cache. Initialization failed.")
+                job_logs.append("FATAL: No models found in cache. Initialization failed.")
+                _MODEL_INITIALIZED = False
+                return False
+
+            logger.info(f"Initializing models {cached_models} ...")
+            job_logs.append(f"INFO: Initializing models {cached_models}...")
             MODEL = predict.Predictor()
-            MODEL.setup(job_logs,models) # Pass job_logs to setup
+            MODEL.setup(job_logs, cached_models)  # Pass job_logs to setup
             logger.info("Model initialized successfully.")
             job_logs.append("INFO: Model initialized successfully.")
+            _MODEL_INITIALIZED = True
             return True
         except Exception as e:
             logger.error(f"Fatal error during model initialization: {e}", exc_info=True)
             job_logs.append(f"FATAL: Error during model initialization: {e}")
-            MODEL = None # Ensure model is None if setup fails
+            MODEL = None  # Ensure model is None if setup fails
+            _MODEL_INITIALIZED = False
             return False
     return True
 

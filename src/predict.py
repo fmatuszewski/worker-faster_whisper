@@ -7,7 +7,7 @@ repository, with some modifications to make it work with the RP platform.
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import logging
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, Union
 
 from runpod.serverless.utils import rp_cuda
 
