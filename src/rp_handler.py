@@ -24,14 +24,27 @@ logger = logging.getLogger(__name__)
 
 MODEL: Optional[predict.Predictor] = None # Initialize as None
 
-def initialize_model(job_logs: List[str]) -> bool:
+MODELS = [m.strip() for m in os.getenv("WHISPER_MODELS", "tiny").split(",") if m]
+
+if not MODELS:
+    sys.exit("Brak modeli w WHISPER_MODELS !")
+
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "tiny");  
+
+if not DEFAULT_MODEL in MODELS:
+    sys.exit(f"Domyślny model '{DEFAULT_MODEL}' nie jest zawarty w liście dostępnych modeli '{MODELS}' !")
+
+def initialize_model(job_logs: List[str], models: List[str]) -> bool:
     global MODEL
+
+
     if MODEL is None:
         try:
-            logger.info("Initializing model...")
-            job_logs.append("INFO: Initializing model...")
+            logger.warning("Model Should be initialized in the container")
+            logger.info(f"Initializing models {models} ...")
+            job_logs.append(f"INFO: Initializing models {models}...")
             MODEL = predict.Predictor()
-            MODEL.setup(job_logs) # Pass job_logs to setup
+            MODEL.setup(job_logs,models) # Pass job_logs to setup
             logger.info("Model initialized successfully.")
             job_logs.append("INFO: Model initialized successfully.")
             return True
@@ -100,14 +113,21 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
     job_logs: List[str] = [f"INFO: Starting job ID: {job_id}"]
     logger.info(f"Starting job ID: {job_id}")
 
+    job_input = job.get('input', {})
+
     global MODEL
+    global MODELS
+    global DEFAULT_MODEL
+
+    logger.info(f"Check if Model is loaded")
+
     if MODEL is None:
-        if not initialize_model(job_logs):
+        if not initialize_model(job_logs, MODELS):
             logger.error(f"Job {job_id}: Model initialization failed. Cannot proceed.")
             job_logs.append(f"ERROR: Job {job_id}: Model initialization failed. Cannot proceed.")
             return {"error": "Job failed due to model initialization error", "detailed_logs": job_logs}
     
-    job_input = job.get('input', {})
+
     if not job_input:
         logger.error(f"Job {job_id}: No 'input' found in job payload.")
         job_logs.append(f"ERROR: Job {job_id}: No 'input' found in job payload.")
@@ -243,6 +263,7 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
         job_logs.append(f"INFO: Job {job_id}: Starting prediction with audio: {audio_input_path}")
         with rp_debugger.LineTimer('prediction_step'):
             # Ensure MODEL is not None (should be handled by initialization)
+      
             if MODEL is None:
                  job_logs.append(f"CRITICAL: Job {job_id}: MODEL is None before prediction call.")
                  logger.critical(f"Job {job_id}: MODEL is None before prediction call. This should not happen.")
@@ -250,7 +271,7 @@ def run_whisper_job(job: Dict[str, Any]) -> Dict[str, Any]:
 
             whisper_results, predict_logs = MODEL.predict(
                 audio=audio_input_path,
-                model_name=os.getenv("MODEL_SIZE", "tiny"),
+                model_name= job_input["model"] if job_input["model"] in MODELS else DEFAULT_MODEL,
                 transcription=job_input["transcription"],
                 translate=job_input["translate"],
                 language=job_input["language"],

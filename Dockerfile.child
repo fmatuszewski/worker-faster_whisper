@@ -11,7 +11,6 @@
     ARG GIT_BRANCH
 
     # Make the tag visible to the app at runtime
-    ENV MODEL_SIZE=${CHILD_TAG}
     ENV APP_VERSION=${GIT_BRANCH}-${GIT_SHA}
     
     ENV BUCKET_ENDPOINT_URL=https://muozqzkzhpkyruzduxjh.supabase.co/storage/v1/s3 \

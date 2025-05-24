@@ -1,14 +1,21 @@
 # -------------------------------------------------
 # RUNTIME image – rebuilt on each commit
+# https://github.com/runpod-workers/worker-faster_whisper
 # -------------------------------------------------
     FROM runpod/ai-api-faster-whisper:1.0.10
     
-    ARG CHILD_TAG         # tiny | small | large  ← NEW
     ARG GIT_SHA
     ARG GIT_BRANCH
 
+    ARG WHISPER_MODELS="tiny,base,small,medium,large-v1,large-v2,large-v3,turbo"
+    ARG DEFAULT_MODEL="large-v2"
+
+    ENV WHISPER_MODELS=${WHISPER_MODELS}
+    ENV DEFAULT_MODEL=${DEFAULT_MODEL}
+
+    RUN echo "WHISPER_MODELS=$WHISPER_MODELS" 
+
     # Make the tag visible to the app at runtime
-    ENV MODEL_SIZE=${CHILD_TAG}
     ENV APP_VERSION=${GIT_BRANCH}-${GIT_SHA}
     
     ENV BUCKET_ENDPOINT_URL=https://muozqzkzhpkyruzduxjh.supabase.co/storage/v1/s3 \

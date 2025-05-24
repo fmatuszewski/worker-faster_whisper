@@ -52,16 +52,17 @@ class Predictor:
             job_logs.append(f"ERROR: {error_msg}")
             return None, None
 
-    def setup(self, job_logs: List[str]):
+    def setup(self, job_logs: List[str], model_names: Optional[List[str]] = None ):
         """Load the model into memory to make running multiple predictions efficient"""
         # model_names = ["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3"]
-        model_names_to_load = ["tiny", "base", "medium"] # large-v3 can be very resource intensive
-        logger.info(f"Starting model setup. Attempting to load models: {model_names_to_load}")
-        job_logs.append(f"INFO: Starting model setup. Attempting to load models: {model_names_to_load}")
+        if model_names is None:
+            model_names = ["tiny"] # large-v3 can be very resource intensive
+        logger.info(f"Starting model setup. Attempting to load models: {model_names}")
+        job_logs.append(f"INFO: Starting model setup. Attempting to load models: {model_names}")
 
         # Sequentially load models to better manage memory and provide clearer logs if one fails
         loaded_count = 0
-        for model_name_to_load in model_names_to_load:
+        for model_name_to_load in model_names:
             if model_name_to_load not in self.models: # Avoid reloading if already present
                 name, model = self.load_model(model_name_to_load, job_logs)
                 if name and model:
@@ -74,12 +75,12 @@ class Predictor:
                     # Depending on requirements, you might want to raise an error here if a critical model fails
                     # For now, we'll allow partial loading.
         
-        if loaded_count == len(model_names_to_load):
-            logger.info(f"All {len(model_names_to_load)} specified models loaded successfully.")
-            job_logs.append(f"INFO: All {len(model_names_to_load)} specified models loaded successfully.")
+        if loaded_count == len(model_names):
+            logger.info(f"All {len(model_names)} specified models loaded successfully.")
+            job_logs.append(f"INFO: All {len(model_names)} specified models loaded successfully.")
         else:
-            logger.warning(f"Model setup completed. Successfully loaded {loaded_count}/{len(model_names_to_load)} models. Check logs for errors.")
-            job_logs.append(f"WARNING: Model setup completed. Successfully loaded {loaded_count}/{len(model_names_to_load)} models. Check logs for errors.")
+            logger.warning(f"Model setup completed. Successfully loaded {loaded_count}/{len(model_names)} models. Check logs for errors.")
+            job_logs.append(f"WARNING: Model setup completed. Successfully loaded {loaded_count}/{len(model_names)} models. Check logs for errors.")
 
 
     def predict(

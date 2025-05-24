@@ -20,12 +20,15 @@ jobs:
         include:
           - tag: tiny-core
             models: tiny
+            default: tiny
             storage:  10737418240     # 10 GB
           - tag: small-core
             models: tiny,small
+            default: small
             storage: 16106127360     # 15 GB
           - tag: medium-core
-            models: medium
+            models: tiny,medium
+            default: medium
             storage: 21474836480     # 20 GB
 
     steps:
@@ -64,6 +67,8 @@ jobs:
           tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
           build-args: |
             WHISPER_MODELS=${{ matrix.models }}
+            DEFAULT_MODEL=${{ matrix.default }}
+            DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
             GIT_SHA=${{ github.sha }}
             GIT_BRANCH=${{ github.ref_name }}
           cache-from: type=registry,ref=${{ env.CACHE_TAG }}
@@ -112,3 +117,38 @@ jobs:
             GIT_BRANCH=${{ github.ref_name }}
           cache-from: type=registry,ref=${{ env.CACHE_TAG }}
           cache-to:   type=registry,ref=${{ env.CACHE_TAG }},mode=max
+
+  full:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tag: all
+            models: tiny,base,small,medium,large-v1,large-v2,large-v3,turbo
+            default: large-v3
+            storage:  10737418240     # 10 GB
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push FULL
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.all
+          push: true
+          tags: ${{ env.IMAGE_REPO }}:${{ matrix.tag }}
+          build-args: |
+            WHISPER_MODELS=${{ matrix.models }}
+            DEFAULT_MODEL=${{ matrix.default }}
+            DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
+            GIT_SHA=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
